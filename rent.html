@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rent - MMU Bike Rental</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="app.js" defer></script>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background: linear-gradient(135deg, #e9eafc 0%, #f7f7fa 100%);
+      margin: 0;
+      color: #222;
+    }
+    header {
+      background: #5b0be5;
+      color: #fff;
+      padding: 18px 0;
+      text-align: center;
+      font-size: 1.2em;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px rgba(91,11,229,0.08);
+    }
+    header a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 18px;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+    header a:hover {
+      color: #ffeeba;
+    }
+    main {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 24px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(91,11,229,0.07);
+    }
+    h1 {
+      color: #5b0be5;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.2em;
+      font-weight: 700;
+    }
+    .bikes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 28px;
+      margin-bottom: 40px;
+    }
+    .bike-card {
+      background: #f7f7fa;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(91,11,229,0.06);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.2s;
+    }
+    .bike-card:hover {
+      box-shadow: 0 4px 24px rgba(91,11,229,0.13);
+      transform: translateY(-2px) scale(1.02);
+    }
+    .bike-image img {
+      width: 160px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(91,11,229,0.07);
+    }
+    .bike-info h3 {
+      margin: 0 0 6px 0;
+      color: #222;
+      font-size: 1.15em;
+      font-weight: 700;
+    }
+    .bike-info p {
+      margin: 0 0 8px 0;
+      color: #666;
+      font-size: 0.98em;
+    }
+    .bike-price {
+      font-weight: bold;
+      color: #5b0be5;
+      margin-bottom: 10px;
+    }
+    .btn {
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: none;
+      background: #5b0be5;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    .btn:hover {
+      background: #3a087e;
+    }
+    .rental-section {
+      margin-top: 32px;
+      background: #f7f7fa;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(91,11,229,0.06);
+    }
+    .rental-details img {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(91,11,229,0.07);
+      margin-bottom: 10px;
+    }
+    .checkout-form .form-group {
+      margin-bottom: 14px;
+    }
+    .checkout-form label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+      color: #222;
+    }
+    .checkout-form input, .checkout-form select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      background: #fff;
+      margin-bottom: 4px;
+    }
+    .payment-panel {
+      max-width: 500px;
+      margin: 30px auto 0 auto;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(91,11,229,0.06);
+    }
+    .payment-panel h3 {
+      color: #5b0be5;
+      margin-bottom: 18px;
+      font-size: 1.2em;
+      font-weight: 700;
+    }
+    .form-group label {
+      color: #222;
+    }
+    .btn-primary {
+      background: #5b0be5;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1em;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover {
+      background: #3a087e;
+    }
+    #paymentMessage {
+      margin-top: 10px;
+      font-size: 1em;
+      font-weight: 600;
+    }
+    @media (max-width: 700px) {
+      main { padding: 8px; }
+      .bikes-grid { grid-template-columns: 1fr; }
+      .payment-panel { padding: 10px; }
+      .rental-section { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html">Home</a> | <a href="rent.html">Rent</a>
+  </header>
+
+  <main>
+    <section id="bikes" class="bikes-section">
+      <h1>Available Bikes</h1>
+      <!-- populated by app.js -->
+      <div id="bikesList" class="bikes-grid"></div>
+    </section>
+
+    <section id="rental" class="rental-section">
+      <h2 style="color:#5b0be5;">Your Rental</h2>
+      <div id="rentalDetails" class="rental-details"></div>
+      <div id="checkoutForm" class="checkout-form"></div>
+
+      
+
+        
+       
+  <footer style="background-color: #5b0be5; color: #fff; padding: 14px; text-align: center; border-radius:0 0 16px 16px;">
+    <p>&copy; 2025 MMU BikeRent. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Block access if not logged in
+    if (!localStorage.getItem('currentUser')) {
+      alert('Please login or register to access rental services.');
+      window.location.href = 'login.html';
+    }
+
+    // Simple client-side mobile-money payment handler (demo)
+    function processMobilePayment() {
+      const provider = document.getElementById('mmProvider').value.trim();
+      const number = document.getElementById('mmNumber').value.trim();
+      const pin = document.getElementById('mmPin').value.trim();
+      const msgEl = document.getElementById('paymentMessage');
+
+      msgEl.style.color = '#e55b0b';
+      if (!provider) { msgEl.textContent = 'Select a mobile provider.'; return; }
+      if (!/^\d{8,12}$/.test(number.replace(/\D/g,''))) { msgEl.textContent = 'Enter a valid mobile number.'; return; }
+      if (!/^\d{4,6}$/.test(pin)) { msgEl.textContent = 'Enter a valid PIN (4–6 digits).'; return; }
+
+      // Simulate payment processing
+      msgEl.style.color = '#222';
+      msgEl.textContent = 'Processing payment...';
+
+      setTimeout(() => {
+        msgEl.style.color = '#28a745';
+        msgEl.textContent = `Payment successful via ${provider}. Transaction reference: TXN${Date.now().toString().slice(-6)}`;
+        document.getElementById('mmPin').value = '';
+      }, 1200);
+    }
+  </script>
+</body>
+</html>

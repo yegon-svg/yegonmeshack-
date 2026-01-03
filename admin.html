@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Portal - MMU Bike Rental Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; background:#f4f6fa; margin:0; }
+        .container { max-width: 1100px; margin: 32px auto; background:#fff; padding:20px 28px; border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,0.06); }
+        h1,h2 { color:#5b0be5; margin:0 0 12px 0; }
+        .cols { display:flex; gap:20px; }
+        .col { flex:1; min-width:300px; }
+        .btn { background:#5b0be5;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer }
+        .btn.danger{background:#e55b0b}
+        table { width:100%; border-collapse:collapse; margin-top:12px; }
+        th,td{ padding:8px 10px; border:1px solid #eee; text-align:left; font-size:0.95rem; }
+        th{ background:#f0eaff }
+        .small { font-size:0.85rem; color:#666 }
+        .actions button { margin-right:6px; }
+        form.row { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+        form.row input, form.row select { padding:8px; border:1px solid #ddd; border-radius:6px; }
+        .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+        .message { margin-top:8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="topbar">
+            <div>
+                <h1>Admin Portal</h1>
+                <div class="small">Manage users and bicycles</div>
+            </div>
+            <div id="adminControls"></div>
+        </div>
+
+        <!-- AUTH SECTION -->
+        <div id="authArea">
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                <div style="min-width:320px; background:#fff; padding:16px; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.03);">
+                    <h2>Admin Login</h2>
+                    <form id="adminLoginForm">
+                        <input id="loginEmail" type="email" placeholder="Admin email" required style="width:100%;margin-bottom:8px;padding:8px;">
+                        <input id="loginPassword" type="password" placeholder="Password" required style="width:100%;margin-bottom:8px;padding:8px;">
+                        <button class="btn" type="submit">Login</button>
+                    </form>
+                    <p id="loginMessage" class="message" style="color:red"></p>
+                </div>
+
+                <div style="min-width:320px; background:#fff; padding:16px; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.03);">
+                    <h2>Create Admin</h2>
+                    <form id="adminRegisterForm">
+                        <input id="regEmail" type="email" placeholder="Email" required style="width:100%;margin-bottom:8px;padding:8px;">
+                        <input id="regPassword" type="password" placeholder="Password" required style="width:100%;margin-bottom:8px;padding:8px;">
+                        <button class="btn" type="submit">Register</button>
+                    </form>
+                    <p id="registerMessage" class="message" style="color:red"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" style="display:none; margin-top:18px;">
+            <div style="display:flex; gap:20px; align-items:flex-start;">
+                <div class="col">
+                    <h2>Registered Users</h2>
+                    <table id="userTable">
+                        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="col">
+                    <h2>Bicycles</h2>
+
+                
+
+    <!-- add bike (updated to support image file upload + preview) -->
+    <form id="addBikeForm" class="row" enctype="multipart/form-data">
+        <input id="bikeName" placeholder="Name" required>
+        <input id="bikeType" placeholder="Type (e.g., Road)" required>
+        <input id="bikePrice" type="number" placeholder="Price/day" required>
+        
+        <!-- File input for image -->
+        <input id="bikeImageFile" type="file" accept="image/*" required>
+        <!-- Hidden input will hold the base64/dataURL to store in localStorage -->
+        <input id="bikeImage" type="hidden" value="">
+        <!-- Small preview -->
+        <div id="bikeImagePreview" style="width:60px; height:40px; border-radius:6px; overflow:hidden; display:inline-block; vertical-align:middle; background:#f0f0f0;">
+            <!-- preview inserted here -->
+        </div>
+
+        <select id="bikeAvailable">
+            <option value="true">Available</option>
+            <option value="false">Not available</option>
+        </select>
+        <button class="btn" type="submit">Add Bike</button>
+    </form>
+<script>
+// --- image upload preview and add-bike handler (replace existing addBikeForm handler) ---
+
+// read file and set hidden input + preview
+const bikeImageFileInput = document.getElementById('bikeImageFile');
+const bikeImageHidden = document.getElementById('bikeImage');
+const bikeImagePreview = document.getElementById('bikeImagePreview');
+
+bikeImageFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+        bikeImageHidden.value = '';
+        bikeImagePreview.innerHTML = '';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        // store base64/data URL
+        bikeImageHidden.value = evt.target.result;
+        // show preview
+        bikeImagePreview.innerHTML = `<img src="${evt.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
+    };
+    reader.readAsDataURL(file);
+});
+
+// Add bike (stores image data URL)
+document.getElementById('addBikeForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const name = document.getElementById('bikeName').value.trim();
+    const type = document.getElementById('bikeType').value.trim();
+    const price = Number(document.getElementById('bikePrice').value);
+    // image may be a data URL stored in hidden input
+    const image = document.getElementById('bikeImage').value.trim();
+    const available = document.getElementById('bikeAvail').value === 'true';
+
+    if (!image) {
+        alert('Please select an image for the bike.');
+        return;
+    }
+
+    const bikes = JSON.parse(localStorage.getItem('bikes')||'[]');
+    const id = bikes.length ? Math.max(...bikes.map(b=>b.id))+1 : 1;
+    bikes.push({id, name, type, price, image, available});
+    localStorage.setItem('bikes', JSON.stringify(bikes));
+    e.target.reset();
+    bikeImageHidden.value = '';
+    bikeImagePreview.innerHTML = '';
+    loadDashboardData(); // refresh table (ensure function exists)
+});
+</script>
+
+                    <!-- add bike -->
+                    
+
+                    <table id="bikesTable">
+                        <thead><tr><th>Photo</th><th>Name</th><th>Type</th><th>Price</th><th>Available</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-top:18px;">
+                <h2>Recent Rentals</h2>
+                <table id="rentalsTable">
+                    <thead><tr><th>User</th><th>Bike</th><th>Days</th><th>Start</th><th>End</th><th>Provider</th><th>Mobile</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script>
+/* Admin auth and dashboard using localStorage */
+
+/* ---------- utility storage helpers ---------- */
+function getAdmins(){ return JSON.parse(localStorage.getItem('admins')||'[]'); }
+function setAdmins(a){ localStorage.setItem('admins', JSON.stringify(a)); }
+function getCurrentAdmin(){ return JSON.parse(localStorage.getItem('currentAdmin')||'null'); }
+function setCurrentAdmin(a){ localStorage.setItem('currentAdmin', JSON.stringify(a)); }
+function clearCurrentAdmin(){ localStorage.removeItem('currentAdmin'); }
+
+/* seed sample bikes if none */
+function seedBikes(){
+    const existing = JSON.parse(localStorage.getItem('bikes')||'[]');
+    if(existing.length) return;
+    const sample = [
+        {id:1,name:'Mountain Bike',type:'Mountain',price:500,image:'images/mountain-bike-2.jpeg',available:true},
+        {id:2,name:'Road Bike',type:'Road',price:800,image:'images/road-bike-1.jpeg',available:true},
+        {id:3,name:'Electric Bike',type:'E-Bike',price:1500,image:'images/electric-22.jpeg',available:true},
+        {id:4,name:'Hybrid Bike',type:'Hybrid',price:1000,image:'images/hybrid-d.jpeg',available:true}
+    ];
+    localStorage.setItem('bikes', JSON.stringify(sample));
+}
+seedBikes();
+
+/* ---------- AUTH HANDLERS ---------- */
+document.getElementById('adminRegisterForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const email = document.getElementById('regEmail').value.trim();
+    const pw = document.getElementById('regPassword').value;
+    const admins = getAdmins();
+    if(admins.find(a=>a.email===email)){ document.getElementById('registerMessage').textContent='Email already registered.'; return; }
+    admins.push({email, password: btoa(pw)});
+    setAdmins(admins);
+    document.getElementById('registerMessage').style.color='green';
+    document.getElementById('registerMessage').textContent='Admin created. You can login.';
+    setTimeout(()=>{ document.getElementById('registerMessage').textContent=''; }, 2000);
+});
+
+document.getElementById('adminLoginForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pw = document.getElementById('loginPassword').value;
+    const admin = getAdmins().find(a=>a.email===email);
+    if(!admin || atob(admin.password)!==pw){ document.getElementById('loginMessage').textContent='Invalid credentials.'; return; }
+    setCurrentAdmin({email});
+    showDashboard();
+});
+
+/* ---------- UI & Dashboard ---------- */
+const authArea = document.getElementById('authArea');
+const dashboard = document.getElementById('dashboard');
+const adminControls = document.getElementById('adminControls');
+
+function showDashboard(){
+    authArea.style.display='none';
+    dashboard.style.display='block';
+    renderAdminControls();
+    loadDashboardData();
+}
+function showAuth(){
+    authArea.style.display='block';
+    dashboard.style.display='none';
+    adminControls.innerHTML='';
+}
+
+/* render top controls when logged in */
+function renderAdminControls(){
+    const admin = getCurrentAdmin();
+    if(!admin){ adminControls.innerHTML=''; return; }
+    adminControls.innerHTML = `<div class="small">Signed in: ${admin.email}</div>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn" id="refreshBtn">Refresh</button>
+            <button class="btn danger" id="logoutBtn">Logout</button>
+        </div>`;
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{ clearCurrentAdmin(); showAuth(); });
+    document.getElementById('refreshBtn').addEventListener('click', loadDashboardData);
+}
+
+/* ---------- load tables ---------- */
+function loadDashboardData(){
+    // users
+    const users = JSON.parse(localStorage.getItem('users')||'[]');
+    const userTbody = document.querySelector('#userTable tbody');
+    userTbody.innerHTML = users.map(u=>`
+        <tr>
+            <td>${u.fullname||''}</td>
+            <td>${u.email||''}</td>
+            <td>${u.phone||''}</td>
+            <td class="actions">
+                <button class="btn" onclick="viewUser('${u.email}')">View</button>
+                <button class="btn danger" onclick="deleteUser('${u.email}')">Delete</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="4" class="small">No users registered</td></tr>';
+
+    // bikes
+    const bikes = JSON.parse(localStorage.getItem('bikes')||'[]');
+    const bikesTbody = document.querySelector('#bikesTable tbody');
+    bikesTbody.innerHTML = bikes.map(b=>`
+        <tr data-id="${b.id}">
+            <td><img src="${b.image}" alt="${b.name}" style="width:60px;height:40px;object-fit:cover;border-radius:6px"></td>
+            <td>${b.name}</td>
+            <td>${b.type}</td>
+            <td>KES ${b.price}</td>
+            <td>${b.available? 'Yes' : 'No'}</td>
+            <td class="actions">
+                <button class="btn" onclick="toggleBike(${b.id})">${b.available? 'Mark Not Available':'Mark Available'}</button>
+                <button class="btn" onclick="editBike(${b.id})">Edit</button>
+                <button class="btn danger" onclick="deleteBike(${b.id})">Delete</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="6" class="small">No bikes</td></tr>';
+
+    // rentals
+    const rentals = JSON.parse(localStorage.getItem('rentals')||'[]');
+    const rentTbody = document.querySelector('#rentalsTable tbody');
+    rentTbody.innerHTML = rentals.map(r=>`
+        <tr>
+            <td>${r.userName||''}</td>
+            <td>${r.bikeName||''}</td>
+            <td>${r.days||''}</td>
+            <td>${r.startDate||''}</td>
+            <td>${r.endDate||''}</td>
+            <td>${r.provider||''}</td>
+            <td>${r.mobile||''}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="7" class="small">No rentals yet</td></tr>';
+}
+
+/* ---------- user actions ---------- */
+window.viewUser = function(email){
+    const users = JSON.parse(localStorage.getItem('users')||'[]');
+    const u = users.find(x=>x.email===email);
+    if(!u) return alert('User not found');
+    alert(`Name: ${u.fullname}\nEmail: ${u.email}\nPhone: ${u.phone}`);
+};
+
+window.deleteUser = function(email){
+    if(!confirm('Delete user and their rentals?')) return;
+    let users = JSON.parse(localStorage.getItem('users')||'[]');
+    users = users.filter(u=>u.email!==email);
+    localStorage.setItem('users', JSON.stringify(users));
+    // remove rentals by user
+    let rentals = JSON.parse(localStorage.getItem('rentals')||'[]');
+    rentals = rentals.filter(r=> r.userEmail !== email);
+    localStorage.setItem('rentals', JSON.stringify(rentals));
+    loadDashboardData();
+};
+
+/* ---------- bike actions ---------- */
+document.getElementById('addBikeForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const name = document.getElementById('bikeName').value.trim();
+    const type = document.getElementById('bikeType').value.trim();
+    const price = Number(document.getElementById('bikePrice').value);
+    const image = document.getElementById('bikeImage').value.trim();
+    const available = document.getElementById('bikeAvail').value === 'true';
+    const bikes = JSON.parse(localStorage.getItem('bikes')||'[]');
+    const id = bikes.length ? Math.max(...bikes.map(b=>b.id))+1 : 1;
+    bikes.push({id, name, type, price, image, available});
+    localStorage.setItem('bikes', JSON.stringify(bikes));
+    e.target.reset();
+    loadDashboardData();
+});
+
+window.toggleBike = function(id){
+    const bikes = JSON.parse(localStorage.getItem('bikes')||'[]');
+    const idx = bikes.findIndex(b=>b.id===id);
+    if(idx===-1) return;
+    bikes[idx].available = !bikes[idx].available;
+    localStorage.setItem('bikes', JSON.stringify(bikes));
+    loadDashboardData();
+};
+
+window.deleteBike = function(id){
+    if(!confirm('Delete this bike?')) return;
+    let bikes = JSON.parse(localStorage.getItem('bikes')||'[]');
+    bikes = bikes.filter(b=>b.id!==id);
+    localStorage.setItem('bikes', JSON.stringify(bikes));
+    loadDashboardData();
+};
+
+window.editBike = function(id){
+    const bikes = JSON.parse(localStorage.getItem('bikes')||'[]');
+    const bike = bikes.find(b=>b.id===id);
+    if(!bike) return;
+    const name = prompt('Name:', bike.name);
+    if(!name) return;
+    const type = prompt('Type:', bike.type) || bike.type;
+    const price = parseFloat(prompt('Price/day:', bike.price) || bike.price);
+    const image = prompt('Image path:', bike.image) || bike.image;
+    bike.name = name; bike.type = type; bike.price = price; bike.image = image;
+    localStorage.setItem('bikes', JSON.stringify(bikes));
+    loadDashboardData();
+};
+
+/* ---------- init on load ---------- */
+window.addEventListener('load', ()=>{
+    const current = getCurrentAdmin();
+    if(current) showDashboard(); else showAuth();
+});
+</script>
+</body>
+</html>

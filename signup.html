@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sign Up - MMU Bike Rental</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .auth-container { max-width:400px; margin:40px auto; padding:20px; border:1px solid #ddd; border-radius:8px; background:#f9f9f9; }
+    .auth-container h2 { text-align:center; color:#5b0be5; }
+    .form-group { margin-bottom:15px; }
+    .form-group label { display:block; font-weight:600; margin-bottom:5px; }
+    .form-group input { width:100%; padding:10px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; }
+    .btn-submit { width:100%; padding:10px; background:#5b0be5; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:600; }
+    .btn-submit:hover { background:#4a0ab5; }
+    .message { text-align:center; margin-top:10px; padding:10px; border-radius:4px; }
+    .message.success { background:#d4edda; color:#155724; }
+    .message.error { background:#f8d7da; color:#721c24; }
+    .link-text { text-align:center; margin-top:15px; }
+    .link-text a { color:#5b0be5; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <header style="padding:12px 16px;">
+    <a href="index.html">Home</a> | <a href="login.html">Login</a> | <a href="signup.html">Sign Up</a>
+  </header>
+
+  <main>
+    <div class="auth-container">
+      <h2>Create Account</h2>
+      <form id="signupForm" onsubmit="handleSignup(event)">
+        <div class="form-group">
+          <label for="fullname">Full Name</label>
+          <input id="fullname" type="text" required />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" type="email" required />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input id="phone" type="tel" placeholder="+254712345678" required />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" type="password" minlength="6" required />
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input id="confirmPassword" type="password" minlength="6" required />
+        </div>
+
+        <button class="btn-submit" type="submit">Sign Up</button>
+      </form>
+
+      <div id="signupMessage" class="message" style="display:none;"></div>
+
+      <div class="link-text">
+        Already have an account? <a href="login.html">Login here</a>
+      </div>
+    </div>
+  </main>
+
+  <footer style="background-color: rgb(91, 11, 229); color: #fff; padding: 10px; text-align: center;">
+    <p>&copy; 2025 MMU BikeRent. All rights reserved.</p>
+  </footer>
+
+  <script>
+    function handleSignup(event) {
+      event.preventDefault();
+
+      const fullname = document.getElementById('fullname').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const msgEl = document.getElementById('signupMessage');
+
+      msgEl.style.display = 'block';
+
+      // Validation
+      if (!fullname || !email || !phone || !password) {
+        msgEl.className = 'message error';
+        msgEl.textContent = 'All fields are required.';
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        msgEl.className = 'message error';
+        msgEl.textContent = 'Passwords do not match.';
+        return;
+      }
+
+      if (password.length < 6) {
+        msgEl.className = 'message error';
+        msgEl.textContent = 'Password must be at least 6 characters.';
+        return;
+      }
+
+      // Check if user already exists
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      if (users.find(u => u.email === email)) {
+        msgEl.className = 'message error';
+        msgEl.textContent = 'Email already registered.';
+        return;
+      }
+
+      // Create new user
+      const newUser = {
+        id: Date.now(),
+        fullname,
+        email,
+        phone,
+        password: btoa(password) // Simple base64 encoding (not secure for production)
+      };
+
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+
+      msgEl.className = 'message success';
+      msgEl.textContent = 'Account created successfully! Redirecting to login...';
+
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login - MMU Bike Rental</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5b0be5;
+      --secondary: #6c63ff;
+      --accent: #e55b0b;
+      --bg-light: #f6f8ff;
+      --bg-dark: #0f172a;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--bg-light) 0%, #ffffff 100%);
+      color: var(--text-dark);
+      transition: background 0.3s, color 0.3s;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.dark-mode {
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f35 100%);
+      color: #e2e8f0;
+    }
+
+    header {
+      padding: 18px 28px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      box-shadow: 0 8px 30px rgba(91, 11, 229, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .header-logo img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    nav a {
+      color: rgba(255, 255, 255, 0.95);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-mode-toggle {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 12px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .dark-mode-toggle:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 20px;
+    }
+
+    .auth-container {
+      max-width: 420px;
+      width: 100%;
+      padding: 32px;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+      animation: slideUp 0.4s ease-out;
+    }
+
+    body.dark-mode .auth-container {
+      background: #1e293b;
+      border: 1px solid #334155;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .auth-header h2 {
+      color: var(--primary);
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .auth-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-dark);
+    }
+
+    body.dark-mode .form-group label {
+      color: #e2e8f0;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s;
+      background: #fff;
+      color: var(--text-dark);
+    }
+
+    body.dark-mode .form-group input,
+    body.dark-mode .form-group select {
+      background: #0f172a;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(91, 11, 229, 0.1);
+    }
+
+    .password-toggle {
+      position: relative;
+    }
+
+    .toggle-icon {
+      position: absolute;
+      right: 12px;
+      top: 38px;
+      cursor: pointer;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.2s;
+      box-shadow: 0 6px 18px rgba(91, 11, 229, 0.15);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(91, 11, 229, 0.2);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .message {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .message.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+
+    .message.error {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border: 1px solid #fca5a5;
+    }
+
+    .message.info {
+      background: #dbeafe;
+      color: #1e3a8a;
+      border: 1px solid #93c5fd;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 22px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    body.dark-mode .divider::before,
+    body.dark-mode .divider::after {
+      background: #334155;
+    }
+
+    .divider span {
+      padding: 0 12px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      cursor: pointer;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .link-section {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    body.dark-mode .link-section {
+      border-top-color: #334155;
+    }
+
+    .link-section a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .link-section a:hover {
+      text-decoration: underline;
+      opacity: 0.8;
+    }
+
+    .signup-link {
+      display: block;
+      margin-top: 12px;
+      color: var(--text-muted);
+    }
+
+    .signup-link strong {
+      color: var(--primary);
+    }
+
+    footer {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: #fff;
+      padding: 18px;
+      text-align: center;
+      margin-top: auto;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      .auth-container { padding: 24px; }
+      .auth-header h2 { font-size: 1.4rem; }
+      header { flex-direction: column; gap: 12px; }
+      nav { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-logo">
+      <img src="mesh.jpeg" alt="MMU Logo">
+      <span>MMU Bike Rental</span>
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="signup.html">Sign Up</a>
+      <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="auth-container">
+      <div class="auth-header">
+        <h2>🔐 Welcome Back</h2>
+        <p>Login to your MMU Bike Rental account</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div id="loginMessage" class="message"></div>
+
+        <div class="form-group">
+          <label for="loginEmail">📧 Email Address</label>
+          <input 
+            id="loginEmail" 
+            type="email" 
+            placeholder="you@example.com"
+            required 
+          />
+        </div>
+
+        <div class="form-group password-toggle">
+          <label for="loginPassword">🔒 Password</label>
+          <input 
+            id="loginPassword" 
+            type="password" 
+            placeholder="Enter your password"
+            required 
+          />
+          <span class="toggle-icon" onclick="togglePasswordVisibility()">👁️</span>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="rememberMe">
+          <label for="rememberMe">Remember me</label>
+        </div>
+
+        <button class="btn-submit" type="submit">
+          <span id="submitText">Login</span>
+        </button>
+      </form>
+
+      <div class="divider">
+        <span>New here?</span>
+      </div>
+
+      <div class="link-section">
+        <div class="signup-link">
+          Don't have an account? <strong><a href="signup.html">Sign Up Now</a></strong>
+        </div>
+        <a href="forgot-password.html">Forgot your password?</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 MMU Bike Rental Hub | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a></p>
+  </footer>
+
+  <script>
+    // Dark mode
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+    if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+
+    // Password visibility toggle
+    function togglePasswordVisibility() {
+      const input = document.getElementById('loginPassword');
+      const icon = document.querySelector('.toggle-icon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = '👁️‍🗨️';
+      } else {
+        input.type = 'password';
+        icon.textContent = '👁️';
+      }
+    }
+
+    // Show notification
+    function showMessage(msg, type = 'info') {
+      const msgEl = document.getElementById('loginMessage');
+      msgEl.textContent = msg;
+      msgEl.className = `message ${type}`;
+      msgEl.style.display = 'block';
+    }
+
+    // Main login handler
+    function handleLogin(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+      const submitBtn = document.querySelector('.btn-submit');
+      const submitText = document.getElementById('submitText');
+
+      // Validate input
+      if (!email || !password) {
+        showMessage('Please fill in all fields.', 'error');
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      submitText.innerHTML = '<span class="loading">⏳</span> Logging in...';
+
+      // Simulate network delay
+      setTimeout(() => {
+        try {
+          const users = JSON.parse(localStorage.getItem('users')) || [];
+          const user = users.find(u => u.email === email);
+
+          if (!user) {
+            showMessage('❌ Email not found. Please sign up first.', 'error');
+            submitBtn.disabled = false;
+            submitText.textContent = 'Login';
+            return;
+          }
+
+          // Decode and compare password
+          const storedPassword = atob(user.password);
+          if (storedPassword !== password) {
+            showMessage('❌ Incorrect password. Please try again.', 'error');
+            submitBtn.disabled = false;
+            submitText.textContent = 'Login';
+            return;
+          }
+
+          // Success
+          showMessage('✅ Login successful! Redirecting...', 'success');
+
+          // Store current user with profile photo if exists
+          const currentUser = {
+            id: user.id,
+            fullname: user.fullname,
+            email: user.email,
+            phone: user.phone,
+            profilePhoto: user.profilePhoto || null
+          };
+
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+          // Remember me option
+          if (rememberMe) {
+            localStorage.setItem('rememberEmail', email);
+          }
+
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+
+        } catch (error) {
+          showMessage('❌ Login error: ' + error.message, 'error');
+          submitBtn.disabled = false;
+          submitText.textContent = 'Login';
+        }
+      }, 800);
+    }
+
+    // Remember email on load
+    document.addEventListener('DOMContentLoaded', () => {
+      const rememberedEmail = localStorage.getItem('rememberEmail');
+      if (rememberedEmail) {
+        document.getElementById('loginEmail').value = rememberedEmail;
+        document.getElementById('rememberMe').checked = true;
+      }
+    });
+
+    // Allow Enter key to submit
+    document.getElementById('loginForm').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.querySelector('.btn-submit').click();
+      }
+    });
+  </script>
+</body>
+</html>

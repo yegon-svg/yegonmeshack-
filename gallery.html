@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMU Bike Rental Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5b0be5;
+            --secondary: #6c63ff;
+            --accent: #e55b0b;
+            --bg-light: #f6f8ff;
+            --bg-dark: #0f172a;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, var(--bg-light) 0%, #ffffff 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #1a1f35 100%);
+            color: #e2e8f0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 28px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            box-shadow: 0 12px 40px rgba(91, 11, 229, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-section img {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .site-title {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.08rem;
+            letter-spacing: 0.3px;
+        }
+
+        .site-tagline {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .dark-mode-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 14px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fff;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #authOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            color: #fff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        #authOverlay h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        #authOverlay p {
+            margin-bottom: 24px;
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 400px;
+            text-align: center;
+        }
+
+        #authOverlay button {
+            padding: 12px 28px;
+            margin: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #authOverlay button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(91, 11, 229, 0.2);
+        }
+
+        .top-bar {
+            background: #f8fafc;
+            padding: 12px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dark-mode .top-bar {
+            background: #1e293b;
+            border-bottom-color: #334155;
+        }
+
+        #userDisplay {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .notification-bar {
+            display: none;
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: #fff;
+            padding: 14px 28px;
+            text-align: center;
+            margin: 0;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.15);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .notification-bar.error {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .notification-bar.info {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            margin: 32px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 18px 50px rgba(91, 11, 229, 0.12);
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.4rem;
+            margin-bottom: 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto 24px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(91, 11, 229, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(91, 11, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-section {
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+            margin-bottom: 28px;
+        }
+
+        .dark-mode .profile-section {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .profile-photo {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            box-shadow: 0 8px 20px rgba(91, 11, 229, 0.12);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .profile-photo:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-details h3 {
+            margin: 0 0 4px 0;
+        }
+
+        .profile-details .small {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 4px 0 12px 0;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .profile-actions .btn {
+            padding: 10px 16px;
+            font-size: 0.95rem;
+        }
+
+        .social-links {
+            text-align: center;
+            margin: 28px 0;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(91, 11, 229, 0.1);
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: translateY(-3px);
+        }
+
+        .social-links img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+        }
+
+        .search-section {
+            margin: 28px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-section input {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 280px;
+            font-size: 1rem;
+        }
+
+        .dark-mode .search-section input {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        .featured-section {
+            background: linear-gradient(135deg, rgba(91, 11, 229, 0.05) 0%, rgba(108, 99, 255, 0.05) 100%);
+            padding: 28px;
+            border-radius: 12px;
+            margin-bottom: 28px;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .dark-mode .featured-section {
+            border-color: #334155;
+        }
+
+        .featured-section img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(91, 11, 229, 0.1);
+        }
+
+        .stats-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(91, 11, 229, 0.12);
+        }
+
+        .stat-item h3 {
+            margin: 0 0 12px 0;
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .stat-item span {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .testimonial-section {
+            background: #fff;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+            margin-bottom: 28px;
+        }
+
+        .dark-mode .testimonial-section {
+            background: #1e293b;
+        }
+
+        .testimonial {
+            padding: 16px;
+            background: #f8fafc;
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+            margin-bottom: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .dark-mode .testimonial {
+            background: #0f172a;
+            color: #cbd5e1;
+        }
+
+        .testimonial-author {
+            display: block;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 8px;
+            font-style: normal;
+        }
+
+        .faq-section details {
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .dark-mode details {
+            border-color: #334155;
+        }
+
+        details summary {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .contact-section {
+            background: #fff;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+            margin-bottom: 28px;
+        }
+
+        .dark-mode .contact-section {
+            background: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .dark-mode .form-group label {
+            color: #e2e8f0;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .dark-mode .form-group input,
+        .dark-mode .form-group textarea {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(91, 11, 229, 0.1);
+        }
+
+        .bike-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .bike-card {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .bike-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(91, 11, 229, 0.15);
+            border: 2px solid var(--primary);
+        }
+
+        .bike-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #fff;
+            padding: 28px;
+            text-align: center;
+            margin-top: 40px;
+            box-shadow: 0 -8px 30px rgba(91, 11, 229, 0.1);
+        }
+
+        footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .small {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 14px; }
+            nav { flex-direction: column; gap: 10px; width: 100%; }
+            nav ul { flex-direction: column; gap: 8px; width: 100%; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .hero { padding: 24px; }
+            .hero h1 { font-size: 1.8rem; }
+            .featured-section { flex-direction: column; }
+            .profile-header { flex-direction: column; }
+            .stats-card { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Overlay -->
+    <div id="authOverlay" style="display:none;">
+        <h2>🚴 Welcome to MMU Bike Rental Hub</h2>
+        <p>Please <b>register</b> or <b>login</b> to access our bike rental services.</p>
+        <div>
+            <button onclick="window.location.href='login.html'">Login</button>
+            <button class="btn-secondary" onclick="window.location.href='signup.html'">Sign Up</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo-section">
+            <img src="mesh.jpeg" alt="MMU Logo">
+            <div>
+                <div class="site-title">MMU Bike Rental Hub</div>
+                <div class="site-tagline">Safe • Affordable • On Campus</div>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li id="rentNav" style="display:none;"><a href="rent.html">Rent</a></li>
+                
+            
+            </ul>
+            <div class="nav-buttons">
+                <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+                <button id="logoutBtn" class="logout-btn" onclick="logout()" style="display:none;">🚪 Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <span id="userDisplay"></span>
+    </div>
+       <section id="bikes" class="bikes-section">
+      <h1>Available Bikes</h1>
+      <!-- populated by app.js -->
+      <div id="bikesList" class="bikes-grid"></div>
+    </section>
+
+   

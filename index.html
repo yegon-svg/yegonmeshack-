@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMU Bike Rental Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5b0be5;
+            --secondary: #6c63ff;
+            --accent: #e55b0b;
+            --bg-light: #f6f8ff;
+            --bg-dark: #0f172a;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, var(--bg-light) 0%, #ffffff 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #1a1f35 100%);
+            color: #e2e8f0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 28px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            box-shadow: 0 12px 40px rgba(91, 11, 229, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-section img {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .site-title {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.08rem;
+            letter-spacing: 0.3px;
+        }
+
+        .site-tagline {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .dark-mode-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 14px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fff;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #authOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            color: #fff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        #authOverlay h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        #authOverlay p {
+            margin-bottom: 24px;
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 400px;
+            text-align: center;
+        }
+
+        #authOverlay button {
+            padding: 12px 28px;
+            margin: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #authOverlay button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(91, 11, 229, 0.2);
+        }
+
+        .top-bar {
+            background: #f8fafc;
+            padding: 12px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dark-mode .top-bar {
+            background: #1e293b;
+            border-bottom-color: #334155;
+        }
+
+        #userDisplay {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .notification-bar {
+            display: none;
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: #fff;
+            padding: 14px 28px;
+            text-align: center;
+            margin: 0;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.15);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .notification-bar.error {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .notification-bar.info {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            margin: 32px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 18px 50px rgba(91, 11, 229, 0.12);
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.4rem;
+            margin-bottom: 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto 24px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(91, 11, 229, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(91, 11, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-section {
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+            margin-bottom: 28px;
+        }
+
+        .dark-mode .profile-section {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .profile-photo {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            box-shadow: 0 8px 20px rgba(91, 11, 229, 0.12);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .profile-photo:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-details h3 {
+            margin: 0 0 4px 0;
+        }
+
+        .profile-details .small {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 4px 0 12px 0;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .profile-actions .btn {
+            padding: 10px 16px;
+            font-size: 0.95rem;
+        }
+
+        .social-links {
+            text-align: center;
+            margin: 28px 0;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(91, 11, 229, 0.1);
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: translateY(-3px);
+        }
+
+        .social-links img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+        }
+
+        .search-section {
+            margin: 28px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-section input {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 280px;
+            font-size: 1rem;
+        }
+
+        .dark-mode .search-section input {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        .featured-section {
+            background: linear-gradient(135deg, rgba(91, 11, 229, 0.05) 0%, rgba(108, 99, 255, 0.05) 100%);
+            padding: 28px;
+            border-radius: 12px;
+            margin-bottom: 28px;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .dark-mode .featured-section {
+            border-color: #334155;
+        }
+
+        .featured-section img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(91, 11, 229, 0.1);
+        }
+
+        .stats-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(91, 11, 229, 0.12);
+        }
+
+        .stat-item h3 {
+            margin: 0 0 12px 0;
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .stat-item span {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .testimonial-section {
+            background: #fff;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+            margin-bottom: 28px;
+        }
+
+        .dark-mode .testimonial-section {
+            background: #1e293b;
+        }
+
+        .testimonial {
+            padding: 16px;
+            background: #f8fafc;
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+            margin-bottom: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .dark-mode .testimonial {
+            background: #0f172a;
+            color: #cbd5e1;
+        }
+
+        .testimonial-author {
+            display: block;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 8px;
+            font-style: normal;
+        }
+
+        .faq-section details {
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .dark-mode details {
+            border-color: #334155;
+        }
+
+        details summary {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .contact-section {
+            background: #fff;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+            margin-bottom: 28px;
+        }
+
+        .dark-mode .contact-section {
+            background: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .dark-mode .form-group label {
+            color: #e2e8f0;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .dark-mode .form-group input,
+        .dark-mode .form-group textarea {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(91, 11, 229, 0.1);
+        }
+
+        .bike-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .bike-card {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .bike-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(91, 11, 229, 0.15);
+            border: 2px solid var(--primary);
+        }
+
+        .bike-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #fff;
+            padding: 28px;
+            text-align: center;
+            margin-top: 40px;
+            box-shadow: 0 -8px 30px rgba(91, 11, 229, 0.1);
+        }
+
+        footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .small {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 14px; }
+            nav { flex-direction: column; gap: 10px; width: 100%; }
+            nav ul { flex-direction: column; gap: 8px; width: 100%; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .hero { padding: 24px; }
+            .hero h1 { font-size: 1.8rem; }
+            .featured-section { flex-direction: column; }
+            .profile-header { flex-direction: column; }
+            .stats-card { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Overlay -->
+    <div id="authOverlay" style="display:none;">
+        <h2>🚴 Welcome to MMU Bike Rental Hub</h2>
+        <p>Please <b>register</b> or <b>login</b> to access our bike rental services.</p>
+        <div>
+            <button onclick="window.location.href='login.html'">Login</button>
+            <button class="btn-secondary" onclick="window.location.href='signup.html'">Sign Up</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo-section">
+            <img src="mesh.jpeg" alt="MMU Logo">
+            <div>
+                <div class="site-title">MMU Bike Rental Hub</div>
+                <div class="site-tagline">Safe • Affordable • On Campus</div>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li id="rentNav" style="display:none;"><a href="rent.html">Rent</a></li>
+                
+            
+            </ul>
+            <div class="nav-buttons">
+                <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+                <button id="logoutBtn" class="logout-btn" onclick="logout()" style="display:none;">🚪 Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <span id="userDisplay"></span>
+    </div>
+
+    <!-- Notification Bar -->
+    <div id="notificationBar" class="notification-bar"></div>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>🚴 Ride Smarter Around Campus</h1>
+            <p>Book a bicycle in seconds. Safe, maintained, and affordable bike rentals for MMU students.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="location.href='rent.html'">Browse Bikes</button>
+                <button class="btn btn-secondary" onclick="location.href='signup.html'">Create Account</button>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profileSection" class="profile-section" style="display:none;">
+            <h2>👤 Your Profile</h2>
+            <div class="profile-header">
+                <img id="profilePhoto" class="profile-photo" src="mesh.jpeg" alt="Profile Photo" onclick="triggerPhotoUpload()" title="Click to change photo">
+                <div class="profile-details">
+                    <div id="profileDetails">
+                        <h3>Guest</h3>
+                        <p class="small">Login to view profile</p>
+                    </div>
+                    <input id="profilePhotoInput" type="file" accept="image/*" style="display:none;">
+                    <div class="profile-actions">
+                        <button class="btn btn-primary" onclick="triggerPhotoUpload()">📸 Change Photo</button>
+                        <button class="btn btn-secondary" onclick="editProfile()">✏️ Edit Profile</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social Links -->
+        <div class="social-links">
+            <a href="https://mmu.ac.ke/" target="_blank" title="Multimedia University of Kenya"><img src="mesh.jpeg" alt="MMU"></a>
+            
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <input type="text" id="bikeSearch" placeholder="🔍 Search bicycles...">
+            <button class="btn btn-primary" onclick="searchBikes()">Search</button>
+        </div>
+
+        <!-- Featured Bicycle -->
+        <section class="featured-section">
+            <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+                <video id="featuredVideo" muted loop playsinline poster="electric-1.jpeg"
+                       style="width:220px;height:150px;object-fit:cover;border-radius:10px;box-shadow:0 8px 20px rgba(91,11,229,0.1);">
+                    <source src="e4e0652d-30f0-41c3-ad43-ba9c45626a27-watermark.mp4" type="video/mp4">
+                    
+                </video>
+
+                <div>
+                    <h3>⚡ Featured: our customer enjoying the bicycle around the campus</h3>
+                    <p>Fast, eco-friendly, and perfect for campus commutes! Enjoy smooth rides with our premium e-bikes.</p>
+                    <div style="margin-top:12px;display:flex;gap:10px;align-items:center;">
+                        <button id="videoStart" class="btn btn-primary" type="button">▶ Start</button>
+                        <button id="videoStop" class="btn btn-secondary" type="button" disabled>■ Stop</button>
+                        <button id="videoMute" class="btn" type="button" title="Toggle mute">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+
+
+    <script>
+        // ...existing code...
+
+        // Featured video controls (start / stop / mute)
+        (function () {
+            function $id(id) { return document.getElementById(id); }
+            document.addEventListener('DOMContentLoaded', () => {
+                const vid = $id('featuredVideo');
+                const startBtn = $id('videoStart');
+                const stopBtn = $id('videoStop');
+                const muteBtn = $id('videoMute');
+
+                if (!vid || !startBtn || !stopBtn || !muteBtn) return;
+
+                // Initial state: paused, muted (video element has muted attribute)
+                vid.pause();
+                vid.currentTime = 0;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+
+                startBtn.addEventListener('click', async () => {
+                    try {
+                        await vid.play();
+                        startBtn.disabled = true;
+                        stopBtn.disabled = false;
+                    } catch (err) {
+                        // Autoplay or play blocked — try unmuting for browsers that require user gesture
+                        console.warn('Video play failed:', err);
+                    }
+                });
+
+                stopBtn.addEventListener('click', () => {
+                    vid.pause();
+                    vid.currentTime = 0;
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                });
+
+                muteBtn.addEventListener('click', () => {
+                    vid.muted = !vid.muted;
+                    muteBtn.textContent = vid.muted ? '🔇' : '🔊';
+                });
+
+                // If user interacts with video itself, keep buttons in sync
+                vid.addEventListener('play', () => {
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                });
+                vid.addEventListener('pause', () => {
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                });
+            });
+        })();
+
+        // ...existing code...
+    </script>
+
+
+        <!-- Statistics -->
+        <div class="stats-card">
+            <div class="stat-item">
+                <h3>🚴 Total Bicycles</h3>
+                <span id="totalBikes">12</span>
+            </div>
+            <div class="stat-item">
+                <h3>📊 Bikes Rented Today</h3>
+                <span id="bikesRented">5</span>
+            </div>
+            <div class="stat-item">
+                <h3>👥 Active Users</h3>
+                <span id="activeUsers">20</span>
+            </div>
+        </div>
+
+        <!-- Testimonials -->
+        <section class="testimonial-section">
+            <h2>⭐ What Our Users Say</h2>
+            <div class="testimonial">
+                "The bikes are always in great condition and the rental process is super smooth!"
+                <span class="testimonial-author">– Alice M. 🌟</span>
+            </div>
+            <div class="testimonial">
+                "Affordable and convenient for getting around campus. Highly recommended!"
+                <span class="testimonial-author">– Brian K. 🌟</span>
+            </div>
+            <div class="testimonial">
+                "I love the electric bikes, especially for early morning classes. Save so much time!"
+                <span class="testimonial-author">– Carol N. 🌟</span>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="faq-section">
+            <h2>❓ Frequently Asked Questions</h2>
+            <details>
+                <summary>How do I rent a bicycle?</summary>
+                <p>Go to the Rent page, select your bicycle, choose rental duration, and complete payment. It takes less than 2 minutes!</p>
+            </details>
+            <details>
+                <summary>What do I need to bring?</summary>
+                <p>Your student ID and a valid payment method (M-Pesa, card, etc.). Helmets are provided for free.</p>
+            </details>
+            <details>
+                <summary>Can I rent more than one bicycle?</summary>
+                <p>Yes, you can rent up to 2 bicycles simultaneously. Perfect for group rides!</p>
+            </details>
+            <details>
+                <summary>How do I contact support?</summary>
+                <p>Use the contact form below or email support@mmubikerent.com. We respond within 2 hours.</p>
+            </details>
+        </section>
+
+        <!-- Contact Form -->
+        <section class="contact-section">
+            <h2>📧 Contact Us</h2>
+            <form id="contactForm">
+                <div class="form-group">
+                    <label>👤 Name</label>
+                    <input type="text" name="name" placeholder="Your full name" required>
+                </div>
+                <div class="form-group">
+                    <label>📧 Email</label>
+                    <input type="email" name="email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>💬 Message</label>
+                    <textarea name="message" placeholder="How can we help?" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">✉️ Send Message</button>
+            </form>
+            <div id="contactMsg" style="margin-top:12px;color:var(--primary);font-weight:600;"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 MMU Bike Rental Hub | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Service</a></p>
+    </footer>
+
+    <script>
+        // Auth check
+        function checkAuth() {
+            const user = localStorage.getItem('currentUser');
+            const overlay = document.getElementById('authOverlay');
+            if (!user) {
+                overlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            } else {
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+        checkAuth();
+
+        // User UI
+        function getCurrentUser() {
+            try { return JSON.parse(localStorage.getItem('currentUser')); } catch { return null; }
+        }
+        function setCurrentUser(u) { localStorage.setItem('currentUser', JSON.stringify(u)); }
+        function clearCurrentUser() { localStorage.removeItem('currentUser'); }
+
+        function updateUserUI() {
+            const u = getCurrentUser();
+            const userDisplay = document.getElementById('userDisplay');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const profileSection = document.getElementById('profileSection');
+            const profilePhoto = document.getElementById('profilePhoto');
+            const profileDetails = document.getElementById('profileDetails');
+            const rentNav = document.getElementById('rentNav');
+
+            if (u) {
+                userDisplay.textContent = `👋 Welcome, ${escapeHtml(u.fullname || u.email)}!`;
+                logoutBtn.style.display = 'inline-block';
+                rentNav.style.display = 'inline-block';
+                profileSection.style.display = 'block';
+                profilePhoto.src = u.profilePhoto || 'mesh.jpeg';
+                profileDetails.innerHTML = `
+                    <h3>${escapeHtml(u.fullname || 'User')}</h3>
+                    <p class="small">📧 ${escapeHtml(u.email)}</p>
+                    <p class="small">📱 ${escapeHtml(u.phone || 'N/A')}</p>
+                `;
+            } else {
+                userDisplay.textContent = '';
+                logoutBtn.style.display = 'none';
+                rentNav.style.display = 'none';
+                profileSection.style.display = 'none';
+            }
+        }
+
+        function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+            clearCurrentUser();
+            showNotification('✅ You have been logged out successfully.', 'success');
+            updateUserUI();
+            checkAuth();
+            setTimeout(() => location.href = 'index.html', 1000);
+        }
+
+        function escapeHtml(s = '') {
+            return String(s).replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;',
+                '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        function showNotification(msg, type = 'success') {
+            const bar = document.getElementById('notificationBar');
+            bar.textContent = msg;
+            bar.className = 'notification-bar ' + type;
+            bar.style.display = 'block';
+            setTimeout(() => bar.style.display = 'none', 3000);
+        }
+
+        // Profile photo
+        const photoInput = document.getElementById('profilePhotoInput');
+        const profilePhoto = document.getElementById('profilePhoto');
+
+        photoInput && photoInput.addEventListener('change', (e) => {
+            const f = e.target.files && e.target.files[0];
+            if (!f) return;
+
+            // Validate file size (max 5MB)
+            if (f.size > 5 * 1024 * 1024) {
+                showNotification('❌ File too large (max 5MB)', 'error');
+                return;
+            }
+
+            // Validate file type
+            if (!f.type.startsWith('image/')) {
+                showNotification('❌ Please upload an image file', 'error');
+                return;
+            }
+
+            const r = new FileReader();
+            r.onload = (ev) => {
+                const u = getCurrentUser();
+                if (!u) return showNotification('❌ Please login first', 'error');
+                u.profilePhoto = ev.target.result;
+                setCurrentUser(u);
+                
+                // sync users list
+                try {
+                    const users = JSON.parse(localStorage.getItem('users') || '[]');
+                    const idx = users.findIndex(x => x.email === u.email);
+                    if (idx > -1) { users[idx].profilePhoto = ev.target.result; localStorage.setItem('users', JSON.stringify(users)); }
+                } catch {}
+                
+                profilePhoto.src = ev.target.result;
+                showNotification('✅ Profile photo updated successfully!', 'success');
+            };
+            r.readAsDataURL(f);
+            e.target.value = '';
+        });
+
+        window.triggerPhotoUpload = () => photoInput && photoInput.click();
+
+        window.editProfile = () => {
+            const u = getCurrentUser();
+            if (!u) return showNotification('❌ Please login first', 'error');
+            
+            const name = prompt('Edit your name:', u.fullname || '');
+            if (name === null) return;
+            if (!name.trim()) return showNotification('❌ Name cannot be empty', 'error');
+            
+            const phone = prompt('Edit your phone (format: 0712345678):', u.phone || '');
+            if (phone === null) return;
+            
+            u.fullname = name;
+            u.phone = phone;
+            setCurrentUser(u);
+            try {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const idx = users.findIndex(x => x.email === u.email);
+                if (idx > -1) { users[idx] = u; localStorage.setItem('users', JSON.stringify(users)); }
+            } catch {}
+            updateUserUI();
+            showNotification('✅ Profile updated successfully!', 'success');
+        };
+
+        // Search
+        window.searchBikes = () => {
+            const q = document.getElementById('bikeSearch').value.toLowerCase();
+            const noResults = !q || q.length < 2;
+            document.querySelectorAll('.bike-card').forEach(card => {
+                if (noResults) {
+                    card.style.opacity = '1';
+                    return;
+                }
+                const alt = card.querySelector('img').alt.toLowerCase();
+                card.style.opacity = alt.includes(q) ? '1' : '0.3';
+            });
+        };
+
+        // Contact form
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const msgs = JSON.parse(localStorage.getItem('messages') || '[]');
+            msgs.unshift({
+                id: Date.now(),
+                name: e.target.name.value,
+                email: e.target.email.value,
+                message: e.target.message.value,
+                created: new Date().toISOString()
+            });
+            localStorage.setItem('messages', JSON.stringify(msgs));
+            document.getElementById('contactMsg').textContent = '✅ Message sent! We\'ll reply soon.';
+            e.target.reset();
+            setTimeout(() => document.getElementById('contactMsg').textContent = '', 3000);
+        });
+
+        // Dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+        if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+
+        // Init
+        updateUserUI();
+        const u = getCurrentUser();
+        if (u) showNotification(`👋 Welcome back, ${escapeHtml(u.fullname || u.email)}!`, 'success');
+    </script>
+</body>
+</html>
